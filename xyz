@@ -32,8 +32,10 @@ Options:
         'Version X.Y.Z' is assumed if this option is omitted.
 
    --publish-command <command>
-        Specify command to run as final step. 'npm publish' is
-        assumed if this option is omitted.
+        Specify the command to be run to publish the package. It may refer
+        to the VERSION and PREVIOUS_VERSION environment variables. A no-op
+        command (':' or 'true') prevents the package from being published
+        to a registry. 'npm publish' is assumed if this option is omitted.
 
 -r --repo <repository>
         Specify the remote repository to which to 'git push'.
@@ -143,7 +145,7 @@ echo        # output \n since [enter] output was suppressed
 run() {
   echo "$1"
   if [[ $dry_run == false ]] ; then
-    eval "$1"
+    VERSION="$next_version" PREVIOUS_VERSION="$version" eval "$1"
   fi
 }
 
@@ -155,18 +157,18 @@ run "npm test"
 
 for script in "${scripts[@]}" ; do
   [[ $script == /* ]] || script="$(pwd)/$script"
-  run "VERSION=$next_version PREVIOUS_VERSION=$version '$script'"
+  run "'$script'"
 done
 
-run "VERSION=$next_version node -e "'"'"
-  var pkg = require('./package.json');
+run 'node -e '"'"'
+  var pkg = require("./package.json");
   pkg.version = process.env.VERSION;
-  fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
-"'"'
+  fs.writeFileSync("package.json", JSON.stringify(pkg, null, 2) + "\n");
+'"'"
 run "git add package.json"
 
 run "git commit$([[ $edit == true ]] && printf ' --edit') --message '$message'"
 run "git tag --annotate '$tag' --message '$message'"
 run "git push --atomic '$repo' 'refs/heads/$branch' 'refs/tags/$tag'"
 
-node -e 'process.exit(require("./package.json").private === true ? 1 : 0)' && run "$publish_command"
+run "$publish_command"
