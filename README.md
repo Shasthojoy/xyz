@@ -15,9 +15,9 @@ Several things will happen if one elects to continue:
     '
     git add package.json
     git commit --message 'Version 0.6.1'
-    git tag --annotate 'v0.6.1' --message 'Version 0.6.1'
-    git push --atomic 'origin' 'refs/heads/master' 'refs/tags/v0.6.1'
-    npm publish
+    git tag --annotate v0.6.1 --message 'Version 0.6.1'
+    git push --atomic origin refs/heads/master refs/tags/v0.6.1
+    bash -c 'npm publish'
 
 xyz accepts several optional arguments, described in the help text:
 
